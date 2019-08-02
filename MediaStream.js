@@ -1,19 +1,14 @@
-'use strict';
+"use strict";
 
-import {NativeModules} from 'react-native';
-import EventTarget from 'event-target-shim';
-import uuid from 'uuid';
+import { NativeModules } from "react-native";
+import EventTarget from "event-target-shim";
+import uuid from "uuid";
 
-import type MediaStreamTrack from './MediaStreamTrack';
+import MediaStreamTrack from "./MediaStreamTrack";
 
-const {WebRTCModule} = NativeModules;
+const { WebRTCModule } = NativeModules;
 
-const MEDIA_STREAM_EVENTS = [
-  'active',
-  'inactive',
-  'addtrack',
-  'removetrack',
-];
+const MEDIA_STREAM_EVENTS = ["active", "inactive", "addtrack", "removetrack"];
 
 export default class MediaStream extends EventTarget(MEDIA_STREAM_EVENTS) {
   id: string;
@@ -48,57 +43,62 @@ export default class MediaStream extends EventTarget(MEDIA_STREAM_EVENTS) {
    *   built afterwards.
    */
   constructor(arg) {
-      super();
+    super();
 
-      // Assigm a UUID to start with. It may get overridden for remote streams.
-      this.id = uuid.v4();
-      // Local MediaStreams are created by WebRTCModule to have their id and
-      // reactTag equal because WebRTCModule follows the respective standard's
-      // recommendation for id generation i.e. uses UUID which is unique enough
-      // for the purposes of reactTag.
-      this._reactTag = this.id;
+    // Assigm a UUID to start with. It may get overridden for remote streams.
+    this.id = uuid.v4();
+    // Local MediaStreams are created by WebRTCModule to have their id and
+    // reactTag equal because WebRTCModule follows the respective standard's
+    // recommendation for id generation i.e. uses UUID which is unique enough
+    // for the purposes of reactTag.
+    this._reactTag = this.id;
 
-      if (typeof arg === 'undefined') {
-          WebRTCModule.mediaStreamCreate(this.id);
-      } else if (arg instanceof MediaStream) {
-          WebRTCModule.mediaStreamCreate(this.id);
-          for (const track of arg.getTracks()) {
-              this.addTrack(track);
-          }
-      } else if (Array.isArray(arg)) {
-          WebRTCModule.mediaStreamCreate(this.id);
-          for (const track of arg) {
-              this.addTrack(track);
-          }
-      } else if (typeof arg === 'object' && arg.streamId && arg.streamReactTag && arg.tracks) {
-          this.id = arg.streamId;
-          this._reactTag = arg.streamReactTag;
-          for (const trackInfo of arg.tracks) {
-              // We are not using addTrack here because the track is already part of the
-              // stream, so there is no need to add it on the native side.
-              this._tracks.push(new MediaStreamTrack(trackInfo));
-          }
-      } else {
-          throw new TypeError(`invalid type: ${typeof arg}`);
+    if (typeof arg === "undefined") {
+      WebRTCModule.mediaStreamCreate(this.id);
+    } else if (arg instanceof MediaStream) {
+      WebRTCModule.mediaStreamCreate(this.id);
+      for (const track of arg.getTracks()) {
+        this.addTrack(track);
       }
+    } else if (Array.isArray(arg)) {
+      WebRTCModule.mediaStreamCreate(this.id);
+      for (const track of arg) {
+        this.addTrack(track);
+      }
+    } else if (
+      typeof arg === "object" &&
+      arg.streamId &&
+      arg.streamReactTag &&
+      arg.tracks
+    ) {
+      this.id = arg.streamId;
+      this._reactTag = arg.streamReactTag;
+      for (const trackInfo of arg.tracks) {
+        // We are not using addTrack here because the track is already part of the
+        // stream, so there is no need to add it on the native side.
+        this._tracks.push(new MediaStreamTrack(trackInfo));
+      }
+    } else {
+      throw new TypeError(`invalid type: ${typeof arg}`);
+    }
   }
 
   addTrack(track: MediaStreamTrack) {
-      const index = this._tracks.indexOf(track);
-      if (index !== -1) {
-          return;
-      }
-      this._tracks.push(track);
-      WebRTCModule.mediaStreamAddTrack(this._reactTag, track.id);
+    const index = this._tracks.indexOf(track);
+    if (index !== -1) {
+      return;
+    }
+    this._tracks.push(track);
+    WebRTCModule.mediaStreamAddTrack(this._reactTag, track.id);
   }
 
   removeTrack(track: MediaStreamTrack) {
-      const index = this._tracks.indexOf(track);
-      if (index === -1) {
-        return;
-      }
-      this._tracks.splice(index, 1);
-      WebRTCModule.mediaStreamRemoveTrack(this._reactTag, track.id);
+    const index = this._tracks.indexOf(track);
+    if (index === -1) {
+      return;
+    }
+    this._tracks.splice(index, 1);
+    WebRTCModule.mediaStreamRemoveTrack(this._reactTag, track.id);
   }
 
   getTracks(): Array<MediaStreamTrack> {
@@ -110,15 +110,15 @@ export default class MediaStream extends EventTarget(MEDIA_STREAM_EVENTS) {
   }
 
   getAudioTracks(): Array<MediaStreamTrack> {
-    return this._tracks.filter(track => track.kind === 'audio');
+    return this._tracks.filter(track => track.kind === "audio");
   }
 
   getVideoTracks(): Array<MediaStreamTrack> {
-    return this._tracks.filter(track => track.kind === 'video');
+    return this._tracks.filter(track => track.kind === "video");
   }
 
   clone() {
-    throw new Error('Not implemented.');
+    throw new Error("Not implemented.");
   }
 
   toURL() {
