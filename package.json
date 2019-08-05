@@ -6,7 +6,7 @@
     "url": "git+https://github.com/react-native-webrtc/react-native-webrtc.git"
   },
   "nativePackage": true,
-  "description": "WebRTC for React Native",
+  "description": "Fork WebRTC for React Native for 0.60.* support",
   "author": {
     "name": "Oney",
     "email": "appdevoney@gmail.com"
